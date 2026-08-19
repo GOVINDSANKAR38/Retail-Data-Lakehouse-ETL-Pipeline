@@ -1,0 +1,177 @@
+version: '3'
+
+services:
+
+  postgres:
+
+    image: postgres:15
+
+    restart: always
+
+    environment:
+
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+
+  airflow-init:
+
+    build: .
+
+    depends_on:
+      - postgres
+
+    restart: always
+
+    environment:
+
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}
+
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_SECRET_KEY}
+
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+
+      S3_BUCKET: ${S3_BUCKET}
+
+      RAW_PREFIX: ${RAW_PREFIX}
+      PROCESSED_PREFIX: ${PROCESSED_PREFIX}
+
+      CRAWLER_NAME: ${CRAWLER_NAME}
+
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
+
+    user: "${AIRFLOW_UID:-50000}:0"
+
+    volumes:
+
+      - ./dags:/opt/airflow/dags
+
+      - ./spark_jobs:/opt/airflow/spark_jobs
+
+      - ./scripts:/opt/airflow/scripts
+
+      - ./tests:/opt/airflow/tests
+
+      - ./logs:/opt/airflow/logs
+
+    command: >
+      bash -c "
+      airflow db migrate &&
+      airflow users create
+      --username ${AIRFLOW_ADMIN_USER}
+      --password ${AIRFLOW_ADMIN_PASSWORD}
+      --firstname Admin
+      --lastname User
+      --role Admin
+      --email ${AIRFLOW_ADMIN_EMAIL}
+      "
+
+
+  airflow-webserver:
+
+    build: .
+
+    restart: always
+
+    depends_on:
+      - postgres
+      - airflow-init
+
+    environment:
+
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}
+
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_SECRET_KEY}
+
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+
+      S3_BUCKET: ${S3_BUCKET}
+
+      RAW_PREFIX: ${RAW_PREFIX}
+      PROCESSED_PREFIX: ${PROCESSED_PREFIX}
+
+      CRAWLER_NAME: ${CRAWLER_NAME}
+
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
+
+    user: "${AIRFLOW_UID:-50000}:0"
+
+    volumes:
+
+      - ./dags:/opt/airflow/dags
+
+      - ./spark_jobs:/opt/airflow/spark_jobs
+
+      - ./scripts:/opt/airflow/scripts
+
+      - ./tests:/opt/airflow/tests
+
+      - ./logs:/opt/airflow/logs
+
+    ports:
+      - "8080:8080"
+
+    command: webserver
+
+
+  airflow-scheduler:
+
+    build: .
+
+    restart: always
+
+    depends_on:
+      - postgres
+      - airflow-init
+
+    environment:
+
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}
+
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_SECRET_KEY}
+
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+
+      S3_BUCKET: ${S3_BUCKET}
+
+      RAW_PREFIX: ${RAW_PREFIX}
+      PROCESSED_PREFIX: ${PROCESSED_PREFIX}
+
+      CRAWLER_NAME: ${CRAWLER_NAME}
+
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
+
+    user: "${AIRFLOW_UID:-50000}:0"
+
+    volumes:
+
+      - ./dags:/opt/airflow/dags
+
+      - ./spark_jobs:/opt/airflow/spark_jobs
+
+      - ./scripts:/opt/airflow/scripts
+
+      - ./tests:/opt/airflow/tests
+
+      - ./logs:/opt/airflow/logs
+
+    command: scheduler
