@@ -1,8 +1,12 @@
-# Enterprise Retail Data Lakehouse Pipeline
+# Retail Data Lakehouse & ETL Pipeline
 
 ## Overview
 
-Enterprise Retail Data Lakehouse Pipeline is an end-to-end Data Engineering project that simulates a modern cloud-based analytics platform for retail and e-commerce data.
+Retail Data Lakehouse & ETL Pipeline is an end-to-end Data Engineering project that simulates a modern cloud-based analytics platform for retail and e-commerce data.
+
+The project automatically extracts product data from a public API, stores raw data in Amazon S3, processes and transforms data using Apache Spark, performs data quality validations, updates the AWS Glue Data Catalog, and enables analytical querying through Amazon Athena.
+
+The entire pipeline is orchestrated using Apache Airflow and containerized with Docker.
 
 The project automatically extracts product data from a public API, stores raw data in Amazon S3, processes and transforms data using Apache Spark, performs data quality validations, updates the AWS Glue Data Catalog, and enables analytical querying through Amazon Athena.
 
@@ -194,8 +198,5 @@ The project includes Discord notifications for task failures through Airflow cal
 
 ---
 
-## Author
-
-Federico  Méndez
 
 
